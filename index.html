@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}FoodDelight - Order Food Online | Fast Delivery{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Hero Offer Banner -->
+  <div class="hero-slider">
+    <div class="hero-slide">
+      <div class="hero-content">
+        <span class="hero-tag"><i class="fas fa-tag"></i> Special Offer</span>
+        <h1 class="hero-title">50% OFF On Your First 3 Orders!</h1>
+        <p class="hero-desc">Craving something tasty? Use coupon code <strong style="color: #FFE082;">WELCOME50</strong> at checkout and enjoy delicious savings.</p>
+        <button class="btn-primary-sm" onclick="app.applyCouponCode('WELCOME50'); app.showToast('Coupon WELCOME50 applied!');">
+          Apply Coupon <i class="fas fa-bolt"></i>
+        </button>
+      </div>
+      <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80" alt="Special Pizza Offer" class="hero-image">
+    </div>
+  </div>
+
+  <!-- Categories Carousel -->
+  <div class="section-header">
+    <h2 class="section-title">
+      <i class="fas fa-th-large" style="color: var(--primary);"></i> What's on your mind?
+    </h2>
+  </div>
+
+  <div class="category-scroll" id="categoryScroll">
+    <div class="category-pill active" onclick="filterCategory('all', this)">
+      <i class="fas fa-utensils" style="font-size: 1.2rem; color: var(--primary);"></i> All Flavors
+    </div>
+    {% for cat in categories %}
+    <div class="category-pill" onclick="filterCategory('{{ cat.slug }}', this)">
+      {% if cat.image %}
+      <img src="{{ cat.image }}" alt="{{ cat.name }}">
+      {% else %}
+      <i class="fas {{ cat.icon }}"></i>
+      {% endif %}
+      <span>{{ cat.name }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Filter & Sorting Toolbar -->
+  <div class="filter-bar" style="margin-top: 24px;">
+    <button class="filter-btn active" onclick="applyFilter('all', this)">
+      <i class="fas fa-sliders-h"></i> All
+    </button>
+    <button class="filter-btn" onclick="applyFilter('veg', this)">
+      <span class="badge-veg"></span> Pure Veg
+    </button>
+    <button class="filter-btn" onclick="applyFilter('nonveg', this)">
+      <span class="badge-nonveg"></span> Non-Veg
+    </button>
+    <button class="filter-btn" onclick="applyFilter('bestseller', this)">
+      <i class="fas fa-fire" style="color: var(--primary);"></i> Bestsellers
+    </button>
+    <button class="filter-btn" onclick="applyFilter('rating', this)">
+      <i class="fas fa-star" style="color: var(--accent-gold);"></i> 4.5+ Rating
+    </button>
+  </div>
+
+  <!-- Featured Restaurants Section -->
+  <div class="section-header">
+    <h2 class="section-title">
+      <i class="fas fa-store" style="color: var(--primary);"></i> Featured Restaurants
+    </h2>
+  </div>
+
+  <div class="grid-restaurants" id="restaurantsGrid">
+    {% for rest in featured_restaurants %}
+    <div class="card-restaurant" data-cuisine="{{ rest.cuisine|lower }}" data-rating="{{ rest.rating }}">
+      <div class="card-restaurant-img">
+        <img src="{{ rest.image }}" alt="{{ rest.name }}">
+        <button class="card-wishlist-btn" data-id="{{ rest.id }}" onclick="app.toggleWishlist({{ rest.id }}, '{{ rest.name|escapejs }}')">
+          <i class="far fa-heart"></i>
+        </button>
+      </div>
+      <div class="card-restaurant-body">
+        <a href="{% url 'restaurant_detail' rest.slug %}">
+          <h3 class="card-restaurant-title">{{ rest.name }}</h3>
+        </a>
+        <div class="card-restaurant-cuisine">{{ rest.cuisine }}</div>
+        <div class="card-restaurant-footer">
+          <span class="rating-badge">
+            <i class="fas fa-star"></i> {{ rest.rating }}
+          </span>
+          <span class="chip-meta"><i class="far fa-clock"></i> {{ rest.delivery_time }}</span>
+          <span class="chip-meta">₹{{ rest.price_for_two|floatformat:0 }} for two</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Popular Dishes Section -->
+  <div class="section-header">
+    <h2 class="section-title">
+      <i class="fas fa-hamburger" style="color: var(--primary);"></i> Trending & Popular Dishes
+    </h2>
+  </div>
+
+  <div class="grid-dishes" id="dishesGrid">
+    {% for dish in popular_dishes %}
+    <div class="card-dish" data-category="{{ dish.category.slug }}" data-veg="{{ dish.is_veg|yesno:'true,false' }}" data-bestseller="{{ dish.is_bestseller|yesno:'true,false' }}">
+      <div class="card-dish-top">
+        <div class="card-dish-info">
+          <div>
+            {% if dish.is_veg %}
+            <span class="badge-veg" title="Vegetarian"></span>
+            {% else %}
+            <span class="badge-nonveg" title="Non-Vegetarian"></span>
+            {% endif %}
+            {% if dish.is_bestseller %}
+            <span style="background: var(--primary-light); color: var(--primary); font-size: 0.72rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">BESTSELLER</span>
+            {% endif %}
+          </div>
+          <h3 class="card-dish-title">{{ dish.name }}</h3>
+          <div class="card-dish-price">₹{{ dish.price|floatformat:2 }}</div>
+          <p class="card-dish-desc">{{ dish.description }}</p>
+        </div>
+        <div class="card-dish-img-wrap">
+          <img src="{{ dish.image }}" alt="{{ dish.name }}" class="card-dish-img">
+          <div class="dish-action-area" 
+               data-item-id="{{ dish.id }}" 
+               data-item-name="{{ dish.name|escapejs }}" 
+               data-item-price="{{ dish.price }}" 
+               data-item-img="{{ dish.image }}">
+            <button class="btn-add-cart" onclick="app.addToCart({{ dish.id }}, '{{ dish.name|escapejs }}', {{ dish.price }}, '{{ dish.image }}')">
+              + ADD
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Testimonials -->
+  <div style="background: var(--bg-card); border-radius: var(--radius-lg); padding: 40px; border: 1px solid var(--border-color); margin-bottom: 48px;">
+    <div style="text-align: center; margin-bottom: 32px;">
+      <h2 style="font-size: 1.8rem; font-weight: 800;">What Foodies Say About Us</h2>
+      <p style="color: var(--text-muted);">Real reviews from thousands of happy food lovers</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px;">
+      <div style="background: var(--bg-main); padding: 24px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+        <div style="color: var(--accent-gold); margin-bottom: 10px;">
+          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+        </div>
+        <p style="font-size: 0.95rem; font-style: italic; margin-bottom: 16px;">"Super fast delivery! The pizza arrived steaming hot with crisp sourdough crust. FoodDelight is my go-to app!"</p>
+        <div style="font-weight: 700;">- Priya Sharma</div>
+      </div>
+      <div style="background: var(--bg-main); padding: 24px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+        <div style="color: var(--accent-gold); margin-bottom: 10px;">
+          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+        </div>
+        <p style="font-size: 0.95rem; font-style: italic; margin-bottom: 16px;">"Love the live order tracking feature. You can actually see your food getting prepared and delivered in real time."</p>
+        <div style="font-weight: 700;">- Rahul Verma</div>
+      </div>
+      <div style="background: var(--bg-main); padding: 24px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+        <div style="color: var(--accent-gold); margin-bottom: 10px;">
+          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+        </div>
+        <p style="font-size: 0.95rem; font-style: italic; margin-bottom: 16px;">"Great coupon discounts and incredible user experience. Dark mode looks so sleek!"</p>
+        <div style="font-weight: 700;">- Ananya Patel</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterCategory(catSlug, el) {
+  document.querySelectorAll('.category-pill').forEach(pill => pill.classList.remove('active'));
+  el.classList.add('active');
+
+  const dishCards = document.querySelectorAll('#dishesGrid .card-dish');
+  dishCards.forEach(card => {
+    if (catSlug === 'all' || card.dataset.category === catSlug) {
+      card.style.display = 'flex';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+function applyFilter(filterType, el) {
+  document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+  el.classList.add('active');
+
+  const dishCards = document.querySelectorAll('#dishesGrid .card-dish');
+  dishCards.forEach(card => {
+    if (filterType === 'all') {
+      card.style.display = 'flex';
+    } else if (filterType === 'veg') {
+      card.style.display = card.dataset.veg === 'true' ? 'flex' : 'none';
+    } else if (filterType === 'nonveg') {
+      card.style.display = card.dataset.veg === 'false' ? 'flex' : 'none';
+    } else if (filterType === 'bestseller') {
+      card.style.display = card.dataset.bestseller === 'true' ? 'flex' : 'none';
+    } else {
+      card.style.display = 'flex';
+    }
+  });
+}
+</script>
+{% endblock %}

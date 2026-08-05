@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ restaurant.name }} Menu - FoodDelight{% endblock %}
+
+{% block content %}
+<div class="container" style="margin-top: 24px;">
+
+  <!-- Restaurant Header Banner -->
+  <div style="background: var(--bg-card); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border-color); box-shadow: var(--shadow-md); margin-bottom: 32px;">
+    <div style="height: 240px; position: relative;">
+      <img src="{{ restaurant.image }}" alt="{{ restaurant.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+      <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);"></div>
+      <div style="position: absolute; bottom: 24px; left: 24px; color: #FFFFFF;">
+        <h1 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 4px;">{{ restaurant.name }}</h1>
+        <div style="font-size: 0.95rem; opacity: 0.9;">{{ restaurant.cuisine }} • {{ restaurant.address }}</div>
+      </div>
+    </div>
+
+    <div style="padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; background: var(--bg-surface);">
+      <div style="display: flex; align-items: center; gap: 24px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="rating-badge" style="font-size: 1rem; padding: 6px 12px;">
+            <i class="fas fa-star"></i> {{ restaurant.rating }}
+          </span>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">({{ restaurant.reviews_count }}+ Ratings)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: 600;">
+          <i class="far fa-clock" style="color: var(--primary);"></i> {{ restaurant.delivery_time }}
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: 600;">
+          <i class="fas fa-wallet" style="color: var(--accent-green);"></i> ₹{{ restaurant.price_for_two|floatformat:0 }} for two
+        </div>
+      </div>
+
+      <button class="btn-icon card-wishlist-btn" data-id="{{ restaurant.id }}" onclick="app.toggleWishlist({{ restaurant.id }}, '{{ restaurant.name|escapejs }}')">
+        <i class="far fa-heart"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Menu Filters & Dish Search -->
+  <div class="filter-bar">
+    <div style="position: relative; flex: 1; max-width: 320px;">
+      <input type="text" id="menuSearch" placeholder="Search in menu..." onkeyup="filterMenu()" style="width: 100%; padding: 8px 14px 8px 36px; border-radius: var(--radius-full); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-main); font-size: 0.9rem; outline: none;">
+      <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem;"></i>
+    </div>
+
+    <button class="filter-btn active" id="btnAllVeg" onclick="toggleVegFilter(this)">
+      <span class="badge-veg"></span> Pure Veg Only
+    </button>
+    <button class="filter-btn" id="btnBestsellers" onclick="toggleBestsellerFilter(this)">
+      <i class="fas fa-fire" style="color: var(--primary);"></i> Bestsellers Only
+    </button>
+  </div>
+
+  <!-- Menu Section -->
+  <div class="section-header">
+    <h2 class="section-title">
+      <i class="fas fa-book-open" style="color: var(--primary);"></i> Menu Items
+    </h2>
+  </div>
+
+  <div class="grid-dishes" id="restaurantMenuGrid">
+    {% for item in menu_items %}
+    <div class="card-dish menu-item-card" 
+         data-name="{{ item.name|lower }}" 
+         data-veg="{{ item.is_veg|yesno:'true,false' }}" 
+         data-bestseller="{{ item.is_bestseller|yesno:'true,false' }}">
+      <div class="card-dish-top">
+        <div class="card-dish-info">
+          <div>
+            {% if item.is_veg %}
+            <span class="badge-veg" title="Vegetarian"></span>
+            {% else %}
+            <span class="badge-nonveg" title="Non-Vegetarian"></span>
+            {% endif %}
+            {% if item.is_bestseller %}
+            <span style="background: var(--primary-light); color: var(--primary); font-size: 0.72rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">BESTSELLER</span>
+            {% endif %}
+          </div>
+          <h3 class="card-dish-title">{{ item.name }}</h3>
+          <div class="card-dish-price">₹{{ item.price|floatformat:2 }}</div>
+          <p class="card-dish-desc">{{ item.description }}</p>
+        </div>
+        <div class="card-dish-img-wrap">
+          <img src="{{ item.image }}" alt="{{ item.name }}" class="card-dish-img">
+          <div class="dish-action-area" 
+               data-item-id="{{ item.id }}" 
+               data-item-name="{{ item.name|escapejs }}" 
+               data-item-price="{{ item.price }}" 
+               data-item-img="{{ item.image }}">
+            <button class="btn-add-cart" onclick="app.addToCart({{ item.id }}, '{{ item.name|escapejs }}', {{ item.price }}, '{{ item.image }}', {{ restaurant.id }})">
+              + ADD
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Reviews Section -->
+  <div style="background: var(--bg-card); border-radius: var(--radius-lg); padding: 32px; border: 1px solid var(--border-color); margin-bottom: 48px;">
+    <h3 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 20px;">Customer Reviews</h3>
+    {% if reviews %}
+      {% for rev in reviews %}
+      <div style="border-bottom: 1px solid var(--border-color); padding: 16px 0;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+          <span style="font-weight: 700;">{{ rev.user.username }}</span>
+          <span class="rating-badge"><i class="fas fa-star"></i> {{ rev.rating }}</span>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">{{ rev.comment }}</p>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p style="color: var(--text-muted);">No reviews yet. Be the first to order and review!</p>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let vegOnlyActive = false;
+let bestsellerOnlyActive = false;
+
+function filterMenu() {
+  const query = document.getElementById('menuSearch').value.toLowerCase();
+  const items = document.querySelectorAll('.menu-item-card');
+
+  items.forEach(item => {
+    const name = item.dataset.name;
+    const isVeg = item.dataset.veg === 'true';
+    const isBestseller = item.dataset.bestseller === 'true';
+
+    let matchesQuery = name.includes(query);
+    let matchesVeg = !vegOnlyActive || isVeg;
+    let matchesBestseller = !bestsellerOnlyActive || isBestseller;
+
+    if (matchesQuery && matchesVeg && matchesBestseller) {
+      item.style.display = 'flex';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+function toggleVegFilter(btn) {
+  vegOnlyActive = !vegOnlyActive;
+  btn.classList.toggle('active', vegOnlyActive);
+  filterMenu();
+}
+
+function toggleBestsellerFilter(btn) {
+  bestsellerOnlyActive = !bestsellerOnlyActive;
+  btn.classList.toggle('active', bestsellerOnlyActive);
+  filterMenu();
+}
+</script>
+{% endblock %}

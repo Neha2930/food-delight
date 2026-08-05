@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}FoodDelight - Delicious Food Delivered Fast{% endblock %}</title>
+  <meta name="description" content="Order food online from top rated restaurants near you. Fast delivery, exciting offers, live order tracking and wide range of cuisines.">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom CSS -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Glassmorphism Navbar -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="{% url 'index' %}" class="brand-logo">
+        <i class="fas fa-fire-alt"></i> FoodDelight
+      </a>
+
+      <div class="location-picker" onclick="app.detectLocation()">
+        <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
+        <span class="current-location-text">Flat 402, Sunshine Heights...</span>
+        <i class="fas fa-chevron-down" style="font-size: 0.75rem; color: var(--text-muted);"></i>
+      </div>
+
+      <div class="nav-search">
+        <i class="fas fa-search"></i>
+        <input type="text" id="globalSearchInput" placeholder="Search for dishes, restaurants or cuisines..." onkeyup="if(event.key === 'Enter') location.href='{% url 'index' %}?q=' + encodeURIComponent(this.value)">
+      </div>
+
+      <div class="nav-actions">
+        <button class="btn-icon" onclick="app.toggleDarkMode()" title="Toggle Dark Mode">
+          <i id="themeIcon" class="fas fa-moon"></i>
+        </button>
+
+        <a href="{% url 'profile' %}" class="btn-icon" title="User Profile / Wishlist">
+          <i class="far fa-heart"></i>
+        </a>
+
+        <button class="btn-icon" onclick="app.toggleCartDrawer()" title="View Cart">
+          <i class="fas fa-shopping-bag"></i>
+          <span class="badge-count cart-badge-count">0</span>
+        </button>
+
+        <a href="{% url 'admin_dashboard' %}" class="btn-primary-sm">
+          <i class="fas fa-store"></i> Admin Portal
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Bottom App Bar -->
+  <div class="mobile-bottom-nav">
+    <a href="{% url 'index' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="{% url 'index' %}#search" class="mobile-nav-item">
+      <i class="fas fa-search"></i>
+      <span>Explore</span>
+    </a>
+    <div class="mobile-nav-item" onclick="app.toggleCartDrawer()">
+      <i class="fas fa-shopping-bag" style="position: relative;">
+        <span class="badge-count cart-badge-count" style="top: -6px; right: -8px;">0</span>
+      </i>
+      <span>Cart</span>
+    </div>
+    <a href="{% url 'tracking' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'tracking' %}active{% endif %}">
+      <i class="fas fa-route"></i>
+      <span>Track</span>
+    </a>
+    <a href="{% url 'profile' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </a>
+  </div>
+
+  <!-- Main Body Content -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Slide-Over Shopping Cart Drawer -->
+  <div class="cart-overlay" id="cartOverlay" onclick="app.toggleCartDrawer()"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <h3 style="font-weight: 700; display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-shopping-basket" style="color: var(--primary);"></i> Your Food Basket
+      </h3>
+      <button onclick="app.toggleCartDrawer()" style="font-size: 1.2rem; color: var(--text-muted);">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="cart-body" id="cartDrawerItems">
+      <!-- Dynamic cart items rendered via app.js -->
+    </div>
+
+    <div class="cart-footer">
+      <div class="summary-row">
+        <span>Item Subtotal</span>
+        <span id="cartSubtotal">₹0.00</span>
+      </div>
+      <div class="summary-row">
+        <span>Delivery Fee</span>
+        <span>₹30.00</span>
+      </div>
+      <div class="summary-row" id="cartDiscountRow" style="display: none; color: var(--accent-green); font-weight: 600;">
+        <span>Promo Discount</span>
+        <span id="cartDiscountVal">-₹0.00</span>
+      </div>
+      <div class="summary-row total">
+        <span>To Pay</span>
+        <span id="cartGrandTotal">₹0.00</span>
+      </div>
+      <a href="{% url 'cart_checkout' %}" class="btn-checkout">
+        Proceed to Checkout <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Global Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div class="brand-logo" style="margin-bottom: 16px;">
+            <i class="fas fa-fire-alt"></i> FoodDelight
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Delivering happiness and fresh food to your doorstep in minutes. Experience premium dining at home.
+          </p>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li>About Us</li>
+            <li>Careers</li>
+            <li>Team</li>
+            <li>FoodDelight One</li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact & Support</h4>
+          <ul>
+            <li>Help & Support</li>
+            <li>Partner with us</li>
+            <li>Ride with us</li>
+            <li>Terms & Conditions</li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>We Deliver To</h4>
+          <ul>
+            <li>Bangalore</li>
+            <li>Mumbai</li>
+            <li>Delhi NCR</li>
+            <li>Hyderabad</li>
+          </ul>
+        </div>
+      </div>
+      <div style="text-align: center; border-top: 1px solid var(--border-color); padding-top: 20px; color: var(--text-muted); font-size: 0.85rem;">
+        © 2026 FoodDelight Technologies Pvt. Ltd. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="{% static 'js/app.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

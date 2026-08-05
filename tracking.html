@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Track Order #{{ order_id }} - FoodDelight{% endblock %}
+
+{% block content %}
+<div class="container" style="margin-top: 32px; margin-bottom: 48px;">
+  
+  <div class="tracking-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
+      <div>
+        <span style="background: var(--primary-light); color: var(--primary); font-weight: 800; font-size: 0.82rem; padding: 4px 12px; border-radius: var(--radius-full);">LIVE TRACKING</span>
+        <h1 style="font-size: 1.8rem; font-weight: 800; margin-top: 6px;">Order #{{ order_id }}</h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">From <strong>The Pizza Artisan</strong> • Paid via UPI</p>
+      </div>
+
+      <div style="text-align: right;">
+        <div style="font-size: 0.85rem; color: var(--text-muted);">Estimated Delivery Time</div>
+        <div id="trackingETA" style="font-size: 2rem; font-weight: 800; color: var(--accent-green);">18 Mins</div>
+      </div>
+    </div>
+
+    <!-- Timeline Steps -->
+    <div class="timeline-tracker">
+      <div class="timeline-progress-bar" id="trackingProgress" style="width: 75%;"></div>
+      
+      <div class="timeline-step completed">
+        <div class="step-icon"><i class="fas fa-check"></i></div>
+        <div class="step-label">Order<br>Confirmed</div>
+      </div>
+
+      <div class="timeline-step completed">
+        <div class="step-icon"><i class="fas fa-utensils"></i></div>
+        <div class="step-label">Preparing<br>Food</div>
+      </div>
+
+      <div class="timeline-step completed">
+        <div class="step-icon"><i class="fas fa-box"></i></div>
+        <div class="step-label">Ready for<br>Pickup</div>
+      </div>
+
+      <div class="timeline-step active">
+        <div class="step-icon"><i class="fas fa-motorcycle"></i></div>
+        <div class="step-label">Out for<br>Delivery</div>
+      </div>
+
+      <div class="timeline-step">
+        <div class="step-icon"><i class="fas fa-home"></i></div>
+        <div class="step-label">Delivered</div>
+      </div>
+    </div>
+
+    <!-- Map Simulation Canvas -->
+    <div class="map-simulation" style="margin-bottom: 24px;">
+      <div class="map-route-line"></div>
+      <div class="driver-marker" id="driverMarker">
+        <i class="fas fa-motorcycle"></i>
+      </div>
+    </div>
+
+    <!-- Delivery Executive Card -->
+    <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); flex-wrap: wrap; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover;">
+        <div>
+          <h4 style="font-weight: 700; font-size: 1.05rem;">Ramesh Kumar</h4>
+          <p style="font-size: 0.85rem; color: var(--text-muted);"><i class="fas fa-shield-alt" style="color: var(--accent-green);"></i> Vaccinated • Honda Activa (KA-01-EF-4091)</p>
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 12px;">
+        <button class="btn-primary-sm" onclick="app.showToast('Calling driver Ramesh (+91 98765 43210)...', 'info')" style="background: var(--accent-green);">
+          <i class="fas fa-phone-alt"></i> Call Driver
+        </button>
+        <button class="btn-primary-sm" onclick="app.showToast('Support ticket initiated', 'info')" style="background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border-color);">
+          <i class="fas fa-headset"></i> Support
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Order Items Summary Table -->
+  <div style="background: var(--bg-card); border-radius: var(--radius-lg); padding: 28px; border: 1px solid var(--border-color);">
+    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 16px;">Items in this Order</h3>
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed var(--border-color);">
+      <div>
+        <span style="font-weight: 700;">Classic Margherita Supreme</span> x 2
+      </div>
+      <span style="font-weight: 700; color: var(--primary);">₹698.00</span>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed var(--border-color);">
+      <div>
+        <span style="font-weight: 700;">Molten Lava Chocolate Cake</span> x 1
+      </div>
+      <span style="font-weight: 700; color: var(--primary);">₹149.00</span>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/tracking.js' %}"></script>
+{% endblock %}
